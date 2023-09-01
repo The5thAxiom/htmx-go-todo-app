@@ -8,7 +8,6 @@
         <script src="static/js/htmx.min.js"></script>
     </head>
     <body>
-        {{/* comments */}}
         <h1>{{ .Title }}</h1>
         <ul id="todoLists">
             {{ range.TodoLists }}
@@ -29,6 +28,7 @@
                                     <button
                                         hx-get="/api/todos/uncomplete?todoId={{ .Id }}"
                                         hx-trigger="click"
+                                        hx-target="closest li"
                                         hx-swap="outerHTML"
                                     >X</button>{{ .Task }}
                                     <button
@@ -47,6 +47,7 @@
                                     <button
                                         hx-get="/api/todos/complete?todoId={{ .Id }}"
                                         hx-trigger="click"
+                                        hx-target="closest li"
                                         hx-swap="outerHTML"
                                     >&nbsp;</button>{{ .Task }}
                                     <button

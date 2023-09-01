@@ -109,15 +109,30 @@ func (s *Server) completeTodo(res http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(res, "Invalid todoId: %d\n", todoId)
 		return
 	}
+	todoRow := s.Db.QueryRow("SELECT id, task, description, completed FROM Todo WHERE id=?;", todoId)
+	var todo Todo
+	todoRow.Scan(&todo.Id, &todo.Task, &todo.Description, &todo.Completed)
 
 	fmt.Fprintf(
 		res,
-		`<button
-			hx-get="/api/todos/uncomplete?todoId=%d"
-			hx-trigger="click"
-			hx-swap="outerHTML"
-		>X</button>`,
-		todoId,
+		`<li class="done">
+			<div class="todo-task">
+				<button
+					hx-get="/api/todos/uncomplete?todoId=%d"
+					hx-trigger="click"
+					hx-target="closest li"
+					hx-swap="outerHTML"
+				>X</button>%s
+				<button
+					hx-delete="/api/todos?todoId=%d"
+					hx-swap="delete"
+					hx-trigger="click"
+					hx-target="closest li"
+					hx-confirm="Are you sure you want to delete this task?"
+				>Delete</button>
+			</div>
+			<div class="todo-description">%s</div>
+		</li>`, todo.Id, todo.Task, todo.Id, todo.Description,
 	)
 }
 
@@ -134,15 +149,30 @@ func (s *Server) uncompleteTodo(res http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(res, "Invalid todoId: %d\n", todoId)
 		return
 	}
+	todoRow := s.Db.QueryRow("SELECT id, task, description, completed FROM Todo WHERE id=?;", todoId)
+	var todo Todo
+	todoRow.Scan(&todo.Id, &todo.Task, &todo.Description, &todo.Completed)
 
 	fmt.Fprintf(
 		res,
-		`<button
-			hx-get="/api/todos/complete?todoId=%d"
-			hx-trigger="click"
-			hx-swap="outerHTML"
-		>&nbsp;</button>`,
-		todoId,
+		`<li>
+			<div class="todo-task">
+				<button
+					hx-get="/api/todos/complete?todoId=%d"
+					hx-trigger="click"
+					hx-target="closest li"
+					hx-swap="outerHTML"
+				>&nbsp;</button>%s
+				<button
+					hx-delete="/api/todos?todoId=%d"
+					hx-swap="delete"
+					hx-trigger="click"
+					hx-target="closest li"
+					hx-confirm="Are you sure you want to delete this task?"
+				>Delete</button>
+			</div>
+			<div class="todo-description">%s</div>
+		</li>`, todo.Id, todo.Task, todo.Id, todo.Description,
 	)
 }
 
