@@ -21,7 +21,7 @@ func getAllTodoLists(db *sql.DB) ([]TodoList, error) {
 		}
 
 		todoRows, todoErr := db.Query(
-			`SELECT id, task, completed
+			`SELECT id, task, ifnull(description, ''), completed
 			FROM Todo
 			WHERE todoListId = ?;`,
 			todoList.Id,
@@ -33,7 +33,7 @@ func getAllTodoLists(db *sql.DB) ([]TodoList, error) {
 
 		for todoRows.Next() {
 			var todo Todo
-			if err := todoRows.Scan(&todo.Id, &todo.Task, &todo.Completed); err != nil {
+			if err := todoRows.Scan(&todo.Id, &todo.Task, &todo.Description, &todo.Completed); err != nil {
 				return nil, fmt.Errorf("getAllTodoLists: scanning todoRows: %s", err)
 			}
 			todoList.Todos = append(todoList.Todos, todo)

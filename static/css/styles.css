@@ -1,3 +1,23 @@
 .done {
     text-decoration: line-through;
 }
+
+.todo-task {
+    font-weight: bold;
+}
+
+/* .todo-description {
+    color: darkgray;
+} */
+
+.new-todo-form > * {
+    display: block;
+    width: 15em;
+    padding: 0;
+    margin: 0;
+}
+
+.new-todo-form {
+    display: flex;
+    flex-direction: column;
+}

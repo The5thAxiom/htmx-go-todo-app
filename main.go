@@ -22,10 +22,11 @@ func main() {
 		log.Fatal(pingErr)
 	}
 	fmt.Printf("Connected to db: %s\n", dbName)
+	db.Exec("PRAGMA foreign_keys = ON;")
 	defer db.Close()
 
-	server := routes.Server {
-		Db: db,
+	server := routes.Server{
+		Db:  db,
 		Mux: http.NewServeMux(),
 	}
 

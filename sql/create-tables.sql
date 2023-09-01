@@ -9,5 +9,5 @@ CREATE TABLE Todo (
     description TEXT,
     completed BOOLEAN NOT NULL,
     todoListId INTEGER,
-    FOREIGN KEY (todoListId) REFERENCES TodoList(id)
+    FOREIGN KEY (todoListId) REFERENCES TodoList(id) ON DELETE CASCADE
 );
