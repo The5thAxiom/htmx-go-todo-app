@@ -12,7 +12,6 @@ func (s *Server) AddEndpoints() {
 	s.Mux.HandleFunc("/api/todos/complete", s.completeTodo)
 	s.Mux.HandleFunc("/api/todos/uncomplete", s.uncompleteTodo)
 	s.Mux.HandleFunc("/api/todos/add", s.addTodo)
-	s.Mux.HandleFunc("/api/todoLists/add", s.addTodoList)
 }
 
 func (s *Server) handleTodo (res http.ResponseWriter, req *http.Request) {
@@ -56,6 +55,42 @@ func (s *Server) handleTodoList (res http.ResponseWriter, req *http.Request) {
 		}
 
 		res.WriteHeader(http.StatusAccepted)
+	case "POST":
+		title := req.FormValue("title")
+		insert, insertErr := s.Db.Exec(`INSERT INTO TodoList (title) VALUES (?);`, title)
+		if insertErr != nil {
+			res.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(res, "A database insertion error occurred")
+			return
+		}
+
+		todoListId, _ := insert.LastInsertId()
+
+		fmt.Fprintf(res,`
+			<li>
+				%s
+				<button
+					hx-delete="/api/todoLists?todoListId=%d"
+					hx-swap="delete"
+					hx-trigger="click"
+					hx-target="closest li"
+					hx-confirm="Are you sure you want to delete this todoList? This will also delete all tasks in the list."
+				>Delete</button>
+				<ul id="todoList-%d">
+				</ul>
+				<form
+					class="new-todo-form"
+					hx-post="/api/todos/add?todoListId=%d"
+					hx-swap="beforeend"
+					hx-target="#todoList-%d"
+					hx-on::after-request="this.reset()"
+				>
+					<input type="text" placeholder="Task" name="task"/>
+					<textarea placeholder="description" name="description"></textarea>
+					<button>Add Todo to list <i>%s</i></button>
+				</form>
+			</li>`, title, todoListId, todoListId, todoListId, todoListId, title,
+		)
 	default:
 		res.WriteHeader(http.StatusAccepted)
 	}
@@ -162,43 +197,5 @@ func (s *Server) addTodo(res http.ResponseWriter, req *http.Request) {
 		<div class="todo-description">%s</div>
 	</li>`,
 		todoId, task, todoId, description,
-	)
-}
-
-func (s *Server) addTodoList (res http.ResponseWriter, req *http.Request) {
-	title := req.FormValue("title")
-	insert, insertErr := s.Db.Exec(`INSERT INTO TodoList (title) VALUES (?);`, title)
-	if insertErr != nil {
-		res.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(res, "A database insertion error occurred")
-		return
-	}
-
-	todoListId, _ := insert.LastInsertId()
-
-	fmt.Fprintf(res,`
-		<li>
-			%s
-			<button
-				hx-delete="/api/todoLists?todoListId=%d"
-				hx-swap="delete"
-				hx-trigger="click"
-				hx-target="closest li"
-				hx-confirm="Are you sure you want to delete this todoList? This will also delete all tasks in the list."
-			>Delete</button>
-			<ul id="todoList-%d">
-			</ul>
-			<form
-				class="new-todo-form"
-				hx-post="/api/todos/add?todoListId=%d"
-				hx-swap="beforeend"
-				hx-target="#todoList-%d"
-				hx-on::after-request="this.reset()"
-			>
-				<input type="text" placeholder="Task" name="task"/>
-				<textarea placeholder="description" name="description"></textarea>
-				<button>Add Todo to list <i>%s</i></button>
-			</form>
-		</li>`, title, todoListId, todoListId, todoListId, todoListId, title,
 	)
 }

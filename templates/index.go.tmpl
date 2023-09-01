@@ -78,7 +78,7 @@
         </ul>
         <form
             class="new-todoList-form"
-            hx-post="/api/todoLists/add"
+            hx-post="/api/todoLists"
             hx-target="#todoLists"
             hx-swap="beforeend"
             hx-on::after-request="this.reset()"
