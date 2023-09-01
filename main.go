@@ -32,6 +32,7 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 	server.Mux.Handle("/static/", http.StripPrefix("/static/", fs))
 	server.AddRoutes()
+	server.AddEndpoints()
 
 	fmt.Printf("Starting a server on port %d\n", port)
 	serverError := http.ListenAndServe(fmt.Sprintf(":%d", port), server.Mux)

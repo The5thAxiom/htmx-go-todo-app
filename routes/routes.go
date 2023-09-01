@@ -11,7 +11,7 @@ func (s *Server) AddRoutes() {
 }
 
 func (s *Server) index(res http.ResponseWriter, req *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.tmpl"))
+	tmpl := template.Must(template.ParseFiles("templates/index.go.tmpl"))
 	todoLists, err := getAllTodoLists(s.Db)
 	if err != nil {
 		fmt.Fprintf(res, "error hogyi bhaiya ek")

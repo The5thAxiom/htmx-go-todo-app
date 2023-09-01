@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{{ .Title }}</title>
+        <link rel="stylesheet" href="static/css/styles.css">
+        <script src="static/js/htmx.min.js"></script>
+    </head>
+    <body>
+        {{/* comments */}}
+        <h1>{{ .Title }}</h1>
+        <ul>
+            {{ range.TodoLists }}
+            <li>
+                {{ .Title }}
+                {{ range.Todos }}
+                    <ul>
+                        {{ if .Completed }}
+                            <li class="done">
+                                <button
+                                    hx-get="/api/todos/uncomplete?id={{ .Id }}"
+                                    hx-trigger="click"
+                                    hx-swap="outerHTML"
+                                >X</button>{{ .Task }}
+                            </li>
+                        {{ else }}
+                            <li>
+                                <button
+                                    hx-get="/api/todos/complete?id={{ .Id }}"
+                                    hx-trigger="click"
+                                    hx-swap="outerHTML"
+                                >&nbsp;</button>{{ .Task }}
+                            </li>
+                        {{ end }}
+                    </ul>
+                {{ end }}
+            </li>
+            {{ end }}
+        </ul>
+    </body>
+</html>
