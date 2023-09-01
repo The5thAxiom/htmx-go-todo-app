@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -19,6 +20,7 @@ func (s *Server) handleTodo (res http.ResponseWriter, req *http.Request) {
 	case "DELETE":
 		todoId, todoIdErr := strconv.Atoi(req.URL.Query().Get("todoId"))
 		if todoIdErr != nil {
+			log.Printf("handleTodo: DELETE: todoIdErr: %s\n", todoIdErr)
 			res.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(res, "Invalid todoId: must be an integer")
 			return
@@ -26,6 +28,7 @@ func (s *Server) handleTodo (res http.ResponseWriter, req *http.Request) {
 
 		_, queryErr := s.Db.Exec("DELETE FROM Todo WHERE id=?;", todoId)
 		if queryErr != nil {
+			log.Printf("handleTodo: DELETE: queryErr: %s\n", queryErr)
 			res.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(res, "Invalid todoId: %d\n", todoId)
 			return
@@ -42,6 +45,7 @@ func (s *Server) handleTodoList (res http.ResponseWriter, req *http.Request) {
 	case "DELETE":
 		todoListId, todoListIdErr := strconv.Atoi(req.URL.Query().Get("todoListId"))
 		if todoListIdErr != nil {
+			log.Printf("handleTodoList: DELETE: todoListIdErr: %s\n", todoListIdErr)
 			res.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintln(res, "Invalid todoId: must be an integer")
 			return
@@ -49,6 +53,7 @@ func (s *Server) handleTodoList (res http.ResponseWriter, req *http.Request) {
 
 		_, queryErr := s.Db.Exec("DELETE FROM TodoList WHERE id=?;", todoListId)
 		if queryErr != nil {
+			log.Printf("handleTodoList: DELETE: queryErr: %s\n", queryErr)
 			res.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(res, "Invalid todoListId: %d\n", todoListId)
 			return
@@ -59,6 +64,7 @@ func (s *Server) handleTodoList (res http.ResponseWriter, req *http.Request) {
 		title := req.FormValue("title")
 		insert, insertErr := s.Db.Exec(`INSERT INTO TodoList (title) VALUES (?);`, title)
 		if insertErr != nil {
+			log.Printf("handleTodoList: POST: %s\n", insertErr)
 			res.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(res, "A database insertion error occurred")
 			return
@@ -99,12 +105,14 @@ func (s *Server) handleTodoList (res http.ResponseWriter, req *http.Request) {
 func (s *Server) completeTodo(res http.ResponseWriter, req *http.Request) {
 	todoId, todoIdErr := strconv.Atoi(req.URL.Query().Get("todoId"))
 	if todoIdErr != nil {
+		log.Printf("completeTodo: todoIdErr: %s\n", todoIdErr)
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(res, "Invalid todoId: must be an integer")
 		return
 	}
 	_, queryErr := s.Db.Exec("UPDATE Todo SET completed=TRUE WHERE id=?;", todoId)
 	if queryErr != nil {
+		log.Printf("completeTodo: queryErr: %s\n", queryErr)
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(res, "Invalid todoId: %d\n", todoId)
 		return
@@ -139,12 +147,14 @@ func (s *Server) completeTodo(res http.ResponseWriter, req *http.Request) {
 func (s *Server) uncompleteTodo(res http.ResponseWriter, req *http.Request) {
 	todoId, todoIdErr := strconv.Atoi(req.URL.Query().Get("todoId"))
 	if todoIdErr != nil {
+		log.Printf("uncompleteTodo: todoIdErr: %s\n", todoIdErr)
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(res, "Invalid todoId: must be an integer")
 		return
 	}
 	_, queryErr := s.Db.Exec("UPDATE Todo SET completed=FALSE WHERE id=?;", todoId)
 	if queryErr != nil {
+		log.Printf("uncompleteTodo: todoIdErr: %s\n", queryErr)
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(res, "Invalid todoId: %d\n", todoId)
 		return
@@ -177,8 +187,9 @@ func (s *Server) uncompleteTodo(res http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) addTodo(res http.ResponseWriter, req *http.Request) {
-	todoListId, todoListIderr := strconv.Atoi(req.URL.Query().Get("todoListId"))
-	if todoListIderr != nil {
+	todoListId, todoListIdErr := strconv.Atoi(req.URL.Query().Get("todoListId"))
+	if todoListIdErr != nil {
+		log.Printf("addTodo: todoListIdErr: %s\n", todoListIdErr)
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(res, "Invalid todoListId: must be an integer")
 		return
@@ -187,7 +198,7 @@ func (s *Server) addTodo(res http.ResponseWriter, req *http.Request) {
 	task := req.FormValue("task")
 	description := req.FormValue("description")
 
-	insert, insertError := s.Db.Exec(`
+	insert, insertErr := s.Db.Exec(`
 		INSERT INTO Todo (
 			task,
 			description,
@@ -200,7 +211,8 @@ func (s *Server) addTodo(res http.ResponseWriter, req *http.Request) {
 			?
 		);`, task, description, todoListId,
 	)
-	if insertError != nil {
+	if insertErr != nil {
+		log.Printf("addTodo: insertErr: %s\n", insertErr)
 		res.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(res, "Invalid todoListId: %d\n", todoListId)
 		return
