@@ -12,7 +12,7 @@ func (s *Server) AddRoutes() {
 }
 
 func (s *Server) index(res http.ResponseWriter, req *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.go.tmpl"))
+	tmpl := template.Must(template.ParseGlob("templates/*.go.html"))
 	todoLists, todoListsError := getAllTodoLists(s.Db)
 	if todoListsError != nil {
 		log.Printf("index: todoListsError: %s\n", todoListsError)
@@ -25,6 +25,6 @@ func (s *Server) index(res http.ResponseWriter, req *http.Request) {
 		ErrorMessage: todoListsError,
 	}
 
-	tmpl.Execute(res, data)
+	tmpl.ExecuteTemplate(res, "index.go.html", data)
 }
 

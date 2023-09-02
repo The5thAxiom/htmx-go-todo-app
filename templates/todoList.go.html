@@ -1,0 +1,32 @@
+<li>
+    {{ .Title }} 
+    <button
+        hx-delete="/api/todoLists?todoListId={{.Id}}"
+        hx-swap="delete"
+        hx-trigger="click"
+        hx-target="closest li"
+        hx-confirm="Are you sure you want to delete this todoList? This will also delete all tasks in the list."
+    >Delete</button>
+    <ul id="todoList-{{.Id}}">
+        {{ range .Todos }}
+            {{ if .Completed }}
+                {{template "completeTodo.go.html" .}}
+            {{ else }}
+                {{template "incompleteTodo.go.html" .}}
+            {{ end }}
+        {{ else }}
+            &nbsp;
+        {{ end }}
+    </ul>
+    <form
+        class="new-todo-form"
+        hx-post="/api/todos/add?todoListId={{.Id}}"
+        hx-swap="beforeend"
+        hx-target="#todoList-{{.Id}}"
+        hx-on::after-request="this.reset()"
+    >
+        <input type="text" required placeholder="Task" name="task"/>
+        <textarea placeholder="description" name="description"></textarea>
+        <button>Add Todo to list <i>{{.Title}}</i></button>
+    </form>
+</li>

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -72,31 +73,12 @@ func (s *Server) handleTodoList (res http.ResponseWriter, req *http.Request) {
 
 		todoListId, _ := insert.LastInsertId()
 
-		fmt.Fprintf(res,`
-			<li>
-				%s
-				<button
-					hx-delete="/api/todoLists?todoListId=%d"
-					hx-swap="delete"
-					hx-trigger="click"
-					hx-target="closest li"
-					hx-confirm="Are you sure you want to delete this todoList? This will also delete all tasks in the list."
-				>Delete</button>
-				<ul id="todoList-%d">
-				</ul>
-				<form
-					class="new-todo-form"
-					hx-post="/api/todos/add?todoListId=%d"
-					hx-swap="beforeend"
-					hx-target="#todoList-%d"
-					hx-on::after-request="this.reset()"
-				>
-					<input type="text" placeholder="Task" name="task"/>
-					<textarea placeholder="description" name="description"></textarea>
-					<button>Add Todo to list <i>%s</i></button>
-				</form>
-			</li>`, title, todoListId, todoListId, todoListId, todoListId, title,
-		)
+		tmpl := template.Must(template.ParseFiles("templates/todoList.go.html"))
+		tmpl.Execute(res, TodoList {
+			Id: int(todoListId),
+			Title: title,
+			Todos: []Todo {},
+		})
 	default:
 		res.WriteHeader(http.StatusAccepted)
 	}
@@ -121,27 +103,8 @@ func (s *Server) completeTodo(res http.ResponseWriter, req *http.Request) {
 	var todo Todo
 	todoRow.Scan(&todo.Id, &todo.Task, &todo.Description, &todo.Completed)
 
-	fmt.Fprintf(
-		res,
-		`<li class="done">
-			<div class="todo-task">
-				<button
-					hx-get="/api/todos/uncomplete?todoId=%d"
-					hx-trigger="click"
-					hx-target="closest li"
-					hx-swap="outerHTML"
-				>X</button>%s
-				<button
-					hx-delete="/api/todos?todoId=%d"
-					hx-swap="delete"
-					hx-trigger="click"
-					hx-target="closest li"
-					hx-confirm="Are you sure you want to delete this task?"
-				>Delete</button>
-			</div>
-			<div class="todo-description">%s</div>
-		</li>`, todo.Id, todo.Task, todo.Id, todo.Description,
-	)
+	tmpl := template.Must(template.ParseFiles("templates/completeTodo.go.html"))
+	tmpl.Execute(res, todo)
 }
 
 func (s *Server) uncompleteTodo(res http.ResponseWriter, req *http.Request) {
@@ -163,27 +126,8 @@ func (s *Server) uncompleteTodo(res http.ResponseWriter, req *http.Request) {
 	var todo Todo
 	todoRow.Scan(&todo.Id, &todo.Task, &todo.Description, &todo.Completed)
 
-	fmt.Fprintf(
-		res,
-		`<li>
-			<div class="todo-task">
-				<button
-					hx-get="/api/todos/complete?todoId=%d"
-					hx-trigger="click"
-					hx-target="closest li"
-					hx-swap="outerHTML"
-				>&nbsp;</button>%s
-				<button
-					hx-delete="/api/todos?todoId=%d"
-					hx-swap="delete"
-					hx-trigger="click"
-					hx-target="closest li"
-					hx-confirm="Are you sure you want to delete this task?"
-				>Delete</button>
-			</div>
-			<div class="todo-description">%s</div>
-		</li>`, todo.Id, todo.Task, todo.Id, todo.Description,
-	)
+	tmpl := template.Must(template.ParseFiles("templates/incompleteTodo.go.html"))
+	tmpl.Execute(res, todo)
 }
 
 func (s *Server) addTodo(res http.ResponseWriter, req *http.Request) {
@@ -219,25 +163,11 @@ func (s *Server) addTodo(res http.ResponseWriter, req *http.Request) {
 	}
 	todoId, _ := insert.LastInsertId()
 
-	fmt.Fprintf(
-		res,
-		`<li>
-		<div class="todo-task">
-			<button
-				hx-get="/api/todos/complete?todoId=%d"
-				hx-trigger="click"
-				hx-swap="outerHTML"
-			>&nbsp;</button>%s
-			<button
-				hx-delete="/api/todos?todoId=%d"
-				hx-swap="delete"
-				hx-trigger="click"
-				hx-target="closest li"
-				hx-confirm="Are you sure you want to delete this task?"
-			>Delete</button>
-		</div>
-		<div class="todo-description">%s</div>
-	</li>`,
-		todoId, task, todoId, description,
-	)
+	tmpl := template.Must(template.ParseFiles("templates/incompleteTodo.go.html"))
+	tmpl.Execute(res, Todo {
+		Id: int(todoId),
+		Task: task,
+		Description: description,
+		Completed: false,
+	})
 }
