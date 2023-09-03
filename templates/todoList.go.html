@@ -9,18 +9,12 @@
     >Delete</button>
     <ul id="todoList-{{.Id}}">
         {{ range .Todos }}
-            {{ if .Completed }}
-                {{template "completeTodo.go.html" .}}
-            {{ else }}
-                {{template "incompleteTodo.go.html" .}}
-            {{ end }}
-        {{ else }}
-            &nbsp;
-        {{ end }}
+            {{template "todo.go.html" .}}
+        {{ else }}{{ end }}
     </ul>
     <form
         class="new-todo-form"
-        hx-post="/api/todos/add?todoListId={{.Id}}"
+        hx-post="/api/todos?todoListId={{.Id}}"
         hx-swap="beforeend"
         hx-target="#todoList-{{.Id}}"
         hx-on::after-request="this.reset()"

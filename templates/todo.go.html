@@ -1,15 +1,22 @@
-<li class="todo done">
+<li class="todo {{ if .Completed }}done{{else}}&nbsp;{{ end }}">
 	<div class="todo-task">
 		<button
-			hx-get="/api/todos/uncomplete?todoId={{ .Id }}"
+			hx-patch="/api/todos?todoId={{ .Id }}&setCompleted={{ if .Completed }}false{{else}}true{{ end }}"
 			hx-trigger="click"
 			hx-target="closest .todo"
 			hx-swap="outerHTML"
-		>X</button>{{ .Task }}
+		>
+		{{- if .Completed -}}
+			X
+		{{ else -}}
+			&nbsp;
+		{{- end -}}
+		</button>
+		{{ .Task }}
 		<button
+			hx-trigger="click"
 			hx-delete="/api/todos?todoId={{ .Id }}"
 			hx-swap="delete"
-			hx-trigger="click"
 			hx-target="closest li"
 			hx-confirm="Are you sure you want to delete this task?"
 		>Delete</button>
